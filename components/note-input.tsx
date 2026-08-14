@@ -3,11 +3,9 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { saveDeck } from "@/lib/storage";
 import type { Deck, Flashcard } from "@/lib/types";
 
@@ -80,89 +78,85 @@ export function NoteInput() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>New deck</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="title">Deck title (optional)</Label>
-            <Input
-              id="title"
-              placeholder="e.g. Cell Biology Ch. 4"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-10">
+      <div className="flex flex-col gap-2.5">
+        <Label htmlFor="title">Deck title — optional</Label>
+        <Input
+          id="title"
+          placeholder="e.g. Cell Biology Ch. 4"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+      </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="notes">Paste your notes</Label>
-            <Textarea
-              id="notes"
-              placeholder="Paste or type your notes here..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={10}
-            />
-          </div>
+      <div className="flex flex-col gap-2.5">
+        <Label htmlFor="notes">Your notes</Label>
+        <Textarea
+          id="notes"
+          placeholder="Paste or type your notes here…"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          rows={9}
+          className="text-[0.9375rem] leading-relaxed"
+        />
+      </div>
 
-          <div className="flex flex-col gap-2">
-            <Label>Or upload files (PDF, image, .txt)</Label>
-            <div
-              className="border-border flex flex-col items-center justify-center gap-2 rounded-md border border-dashed p-6 text-center"
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                e.preventDefault();
-                addFiles(e.dataTransfer.files);
-              }}
-            >
-              <p className="text-muted-foreground text-sm">
-                Drag files here, or
-              </p>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
+      <div className="flex flex-col gap-2.5">
+        <Label>Files — PDF, image, or .txt</Label>
+        <div
+          className="border-border flex items-center justify-between gap-3 border border-dashed py-4 pl-0.5"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            addFiles(e.dataTransfer.files);
+          }}
+        >
+          <p className="text-muted-foreground pl-4 text-sm">Drag files here</p>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="text-brand mr-4 shrink-0 cursor-pointer text-sm underline decoration-transparent underline-offset-4 transition-colors hover:decoration-current"
+          >
+            Choose files
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept={ACCEPTED_TYPES}
+            className="hidden"
+            onChange={(e) => addFiles(e.target.files)}
+          />
+        </div>
+        {files.length > 0 && (
+          <ul className="mt-1 flex flex-col gap-1.5">
+            {files.map((file, i) => (
+              <li
+                key={`${file.name}-${i}`}
+                className="text-muted-foreground flex items-center justify-between gap-3 font-mono text-xs"
               >
-                Choose files
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept={ACCEPTED_TYPES}
-                className="hidden"
-                onChange={(e) => addFiles(e.target.files)}
-              />
-            </div>
-            {files.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-1">
-                {files.map((file, i) => (
-                  <Badge key={`${file.name}-${i}`} variant="secondary" className="gap-1">
-                    {file.name}
-                    <button
-                      type="button"
-                      onClick={() => removeFile(i)}
-                      className="ml-1 opacity-70 hover:opacity-100"
-                      aria-label={`Remove ${file.name}`}
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
+                <span className="truncate">{file.name}</span>
+                <button
+                  type="button"
+                  onClick={() => removeFile(i)}
+                  className="hover:text-foreground shrink-0 transition-colors"
+                  aria-label={`Remove ${file.name}`}
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
-          {error && <p className="text-destructive text-sm">{error}</p>}
+      {error && <p className="text-destructive text-sm">{error}</p>}
 
-          <Button type="submit" disabled={isGenerating}>
-            {isGenerating ? "Generating flashcards..." : "Generate flashcards"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+      <div>
+        <Button type="submit" disabled={isGenerating} size="lg">
+          {isGenerating ? "Generating flashcards…" : "Generate flashcards"}
+        </Button>
+      </div>
+    </form>
   );
 }

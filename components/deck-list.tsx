@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { PenLineIcon, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -27,6 +27,8 @@ import {
 import type { Deck } from "@/lib/types";
 import { deleteDeck, updateDeck } from "@/lib/storage";
 
+const dateFormatter = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" });
+
 function RenameDeckDialog({ deck, onRenamed }: { deck: Deck; onRenamed: () => void }) {
   const [title, setTitle] = useState(deck.title);
   const [open, setOpen] = useState(false);
@@ -39,8 +41,9 @@ function RenameDeckDialog({ deck, onRenamed }: { deck: Deck; onRenamed: () => vo
         setOpen(next);
       }}
     >
-      <DialogTrigger render={<Button variant="outline" size="sm" />}>
-        Rename
+      <DialogTrigger render={<Button variant="ghost" size="icon-sm" />}>
+        <PenLineIcon />
+        <span className="sr-only">Rename &quot;{deck.title}&quot;</span>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -66,62 +69,73 @@ function RenameDeckDialog({ deck, onRenamed }: { deck: Deck; onRenamed: () => vo
   );
 }
 
+function DeleteDeckAction({ deck, onDeleted }: { deck: Deck; onDeleted: () => void }) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger render={<Button variant="ghost" size="icon-sm" />}>
+        <Trash2Icon />
+        <span className="sr-only">Delete &quot;{deck.title}&quot;</span>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete &quot;{deck.title}&quot;?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This deletes the deck and all its cards. This can&apos;t be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => {
+              deleteDeck(deck.id);
+              onDeleted();
+            }}
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
 export function DeckList({ decks, onChange }: { decks: Deck[]; onChange: () => void }) {
   if (decks.length === 0) {
     return (
-      <p className="text-muted-foreground text-center text-sm">
-        No decks yet. Create one to get started.
-      </p>
+      <div className="border-border border-t py-16 text-center">
+        <p className="text-muted-foreground text-sm">
+          Your catalog is empty. Create a deck to begin.
+        </p>
+      </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      {decks.map((deck) => (
-        <Card key={deck.id}>
-          <CardHeader>
-            <CardTitle className="text-base">{deck.title}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground text-sm">
-              {deck.cards.length} card{deck.cards.length === 1 ? "" : "s"}
+    <div className="border-border border-t">
+      {decks.map((deck, index) => (
+        <div
+          key={deck.id}
+          className="border-border group flex items-center gap-4 border-b py-4 sm:gap-6"
+        >
+          <span className="kicker w-6 shrink-0 text-right tabular-nums">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+
+          <Link href={`/decks/${deck.id}`} className="min-w-0 flex-1 py-1">
+            <p className="font-display group-hover:text-brand truncate text-[1.0625rem] tracking-tight text-foreground transition-colors">
+              {deck.title}
             </p>
-          </CardContent>
-          <CardFooter className="flex flex-wrap gap-2">
-            <Button
-              render={<Link href={`/decks/${deck.id}`} />}
-              nativeButton={false}
-              size="sm"
-            >
-              Study
-            </Button>
+            <p className="text-muted-foreground mt-0.5 font-mono text-xs tabular-nums">
+              {deck.cards.length} {deck.cards.length === 1 ? "card" : "cards"} ·{" "}
+              {dateFormatter.format(new Date(deck.createdAt))}
+            </p>
+          </Link>
+
+          <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
             <RenameDeckDialog deck={deck} onRenamed={onChange} />
-            <AlertDialog>
-              <AlertDialogTrigger render={<Button variant="outline" size="sm" />}>
-                Delete
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete &quot;{deck.title}&quot;?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This deletes the deck and all its cards. This can&apos;t be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => {
-                      deleteDeck(deck.id);
-                      onChange();
-                    }}
-                  >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </CardFooter>
-        </Card>
+            <DeleteDeckAction deck={deck} onDeleted={onChange} />
+          </div>
+        </div>
       ))}
     </div>
   );
