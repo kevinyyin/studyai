@@ -6,6 +6,13 @@ import { z } from "zod";
 export const maxDuration = 60;
 
 const flashcardsSchema = z.object({
+  summary: z
+    .string()
+    .describe(
+      "A condensed, more concise rewrite of the notes as flowing prose (2-5 short " +
+        "paragraphs). Keep only the essential information — cut repetition, filler, and " +
+        "tangents. No bullet points or headers.",
+    ),
   cards: z
     .array(
       z.object({
@@ -35,8 +42,9 @@ export async function POST(request: Request) {
     {
       type: "text",
       text:
-        "You are a study assistant. Read the following notes (and any attached files) and generate " +
-        "a set of high-quality flashcards covering the key concepts, definitions, and facts. " +
+        "You are a study assistant. Read the following notes (and any attached files) and produce two things: " +
+        "(1) a condensed, more concise rewrite of the notes as flowing prose, and " +
+        "(2) a set of high-quality flashcards covering the key concepts, definitions, and facts. " +
         "Keep the front of each card short (a question or term) and the back concise but complete. " +
         "Generate as many cards as the material warrants, typically 5-20." +
         (notes ? `\n\nNotes:\n${notes}` : ""),

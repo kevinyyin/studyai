@@ -9,4 +9,5 @@ export interface Deck {
   title: string;
   createdAt: string;
   cards: Flashcard[];
+  summary?: string;
 }
