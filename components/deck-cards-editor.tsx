@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { PenLineIcon, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
@@ -48,15 +48,16 @@ function EditCardDialog({
         setOpen(next);
       }}
     >
-      <DialogTrigger render={<Button variant="outline" size="sm" />}>
-        Edit
+      <DialogTrigger render={<Button variant="ghost" size="icon-sm" />}>
+        <PenLineIcon />
+        <span className="sr-only">Edit card</span>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit card</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-2.5">
             <Label htmlFor={`front-${card.id}`}>Front</Label>
             <Textarea
               id={`front-${card.id}`}
@@ -65,7 +66,7 @@ function EditCardDialog({
               rows={3}
             />
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5">
             <Label htmlFor={`back-${card.id}`}>Back</Label>
             <Textarea
               id={`back-${card.id}`}
@@ -102,42 +103,49 @@ export function DeckCardsEditor({
   if (cards.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-3">
-      <h2 className="text-sm font-medium">All cards ({cards.length})</h2>
-      {cards.map((card) => (
-        <Card key={card.id}>
-          <CardContent className="flex items-start justify-between gap-4 py-4">
-            <div className="flex flex-1 flex-col gap-1 text-sm">
-              <p className="font-medium">{card.front}</p>
-              <p className="text-muted-foreground">{card.back}</p>
-            </div>
-            <div className="flex shrink-0 gap-2">
-              <EditCardDialog
-                card={card}
-                onSave={(front, back) => onUpdateCard(card.id, front, back)}
-              />
-              <AlertDialog>
-                <AlertDialogTrigger render={<Button variant="outline" size="sm" />}>
-                  Delete
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete this card?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This can&apos;t be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => onDeleteCard(card.id)}>
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="mt-14 flex flex-col">
+      <p className="kicker border-border border-t pt-6 pb-4">
+        All cards — {cards.length}
+      </p>
+      {cards.map((card, i) => (
+        <div
+          key={card.id}
+          className="border-border group flex items-start gap-4 border-b py-4 sm:gap-6"
+        >
+          <span className="kicker w-6 shrink-0 pt-0.5 text-right tabular-nums">
+            {String(i + 1).padStart(2, "0")}
+          </span>
+          <div className="min-w-0 flex-1 text-sm">
+            <p className="text-foreground">{card.front}</p>
+            <p className="text-muted-foreground mt-1">{card.back}</p>
+          </div>
+          <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+            <EditCardDialog
+              card={card}
+              onSave={(front, back) => onUpdateCard(card.id, front, back)}
+            />
+            <AlertDialog>
+              <AlertDialogTrigger render={<Button variant="ghost" size="icon-sm" />}>
+                <Trash2Icon />
+                <span className="sr-only">Delete card</span>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete this card?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This can&apos;t be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onDeleteCard(card.id)}>
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
       ))}
     </div>
   );
