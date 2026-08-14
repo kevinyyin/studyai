@@ -66,6 +66,7 @@ export function NoteInput() {
         title: title.trim() || notes.slice(0, 40).trim() || files[0]?.name || "Untitled deck",
         createdAt: new Date().toISOString(),
         cards,
+        summary: typeof data.summary === "string" ? data.summary : undefined,
       };
 
       saveDeck(deck);

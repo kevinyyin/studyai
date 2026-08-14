@@ -17,6 +17,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { StudyMode } from "@/components/study-mode";
+import { CondensedNotes } from "@/components/condensed-notes";
 import { DeckCardsEditor } from "@/components/deck-cards-editor";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { deleteDeck, getDeck, updateDeck } from "@/lib/storage";
@@ -113,6 +114,8 @@ export default function DeckPage({
       </div>
 
       <StudyMode cards={deck.cards} />
+
+      <CondensedNotes summary={deck.summary} />
 
       <DeckCardsEditor
         cards={deck.cards}
